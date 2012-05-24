@@ -1,0 +1,153 @@
+# HG changeset patch
+# Parent 04718dd692c7f22cddd2ff9202e88584d69ec3b8
+edit.m: Use global EDITOR unless overridden by the user
+
+* edit.m: Use a local copy of global settings, fill in EDITOR with
+default if it has not been set.
+
+diff --git a/scripts/miscellaneous/edit.m b/scripts/miscellaneous/edit.m
+--- a/scripts/miscellaneous/edit.m
++++ b/scripts/miscellaneous/edit.m
+@@ -146,7 +146,7 @@
+ 
+   ## Pick up globals or default them.
+ 
+-  persistent FUNCTION = struct ("EDITOR", cstrcat (EDITOR (), " %s"),
++  persistent FUNCTION = struct ("EDITOR", [],
+                                 "AUTHOR", default_user(1),
+                                 "EMAIL",  [],
+                                 "LICENSE",  "GPL",
+@@ -155,6 +155,13 @@
+   ## Make sure the state variables survive "clear functions".
+   mlock;
+ 
++  ## Make a local copy of the global settings.  Fill in values that
++  ## may change from the environment.
++  settings = FUNCTION;
++  if (isempty (settings.EDITOR))
++    settings.EDITOR = cstrcat (EDITOR (), " %s");
++  endif
++
+   if (nargin == 2)
+     switch (toupper (file))
+     case "EDITOR"
+@@ -185,13 +192,13 @@
+       endif
+       FUNCTION.EDITINPLACE = state;
+     case "GET"
+-      if (isfield (FUNCTION, toupper(state)))
+-        ret = FUNCTION.(toupper (state));
++      if (isfield (settings, toupper(state)))
++        ret = settings.(toupper (state));
+       elseif (strcmpi (state, "HOME"))
+         warning ("edit: HOME is no longer supported");
+         ret = "";
+       else
+-        ret = FUNCTION;
++        ret = settings;
+       endif
+     otherwise
+       error ('edit: expected "edit EDITOR|AUTHOR|EMAIL|LICENSE|MODE val"');
+@@ -201,7 +208,7 @@
+ 
+   ## Start the editor without a file if no file is given.
+   if (nargin < 1)
+-    system (sprintf (FUNCTION.EDITOR,""), [], FUNCTION.MODE);
++    system (sprintf (settings.EDITOR,""), [], settings.MODE);
+     return;
+   endif
+ 
+@@ -268,10 +275,10 @@
+ 
+   if (! isempty (fileandpath))
+     ## If the file exists, then edit it.
+-    if (FUNCTION.EDITINPLACE)
++    if (settings.EDITINPLACE)
+       ## Edit in place even if it is protected.
+-      system (sprintf (FUNCTION.EDITOR, cstrcat ("\"", fileandpath, "\"")),
+-              [], FUNCTION.MODE);
++      system (sprintf (settings.EDITOR, cstrcat ("\"", fileandpath, "\"")),
++              [], settings.MODE);
+       return;
+     else
+       ## If the file is modifiable in place then edit it, otherwise make
+@@ -287,8 +294,8 @@
+       else
+         fclose (fid);
+       endif
+-      system (sprintf (FUNCTION.EDITOR, cstrcat ("\"", fileandpath, "\"")),
+-              [], FUNCTION.MODE);
++      system (sprintf (settings.EDITOR, cstrcat ("\"", fileandpath, "\"")),
++              [], settings.MODE);
+       return;
+     endif
+   endif
+@@ -303,8 +310,8 @@
+     case {"cc", "m"}
+       0;
+     otherwise
+-      system (sprintf (FUNCTION.EDITOR, cstrcat ("\"", fileandpath, "\"")),
+-              [], FUNCTION.MODE);
++      system (sprintf (settings.EDITOR, cstrcat ("\"", fileandpath, "\"")),
++              [], settings.MODE);
+       return;
+   endswitch
+ 
+@@ -312,7 +319,7 @@
+   ## template and edit it.
+ 
+   ## Guess the email name if it was not given.
+-  if (isempty (FUNCTION.EMAIL))
++  if (isempty (settings.EMAIL))
+     host = getenv("HOSTNAME");
+     if (isempty (host) && ispc ())
+       host = getenv ("COMPUTERNAME");
+@@ -325,9 +332,9 @@
+       endif
+     endif
+     if (isempty (host))
+-      FUNCTION.EMAIL = " ";
++      settings.EMAIL = " ";
+     else
+-      FUNCTION.EMAIL = cstrcat ("<", default_user(0), "@", host, ">");
++      settings.EMAIL = cstrcat ("<", default_user(0), "@", host, ">");
+     endif
+   endif
+ 
+@@ -336,13 +343,13 @@
+   revs = cstrcat ("Created: ", strftime ("%Y-%m-%d", now));
+ 
+   ## Fill in the copyright string.
+-  copyright = cstrcat (strftime ("Copyright (C) %Y ", now), FUNCTION.AUTHOR);
++  copyright = cstrcat (strftime ("Copyright (C) %Y ", now), settings.AUTHOR);
+ 
+   ## Fill in the author tag field.
+-  author = cstrcat ("Author: ", FUNCTION.AUTHOR, " ", FUNCTION.EMAIL);
++  author = cstrcat ("Author: ", settings.AUTHOR, " ", settings.EMAIL);
+ 
+   ## Fill in the header.
+-  uclicense = toupper (FUNCTION.LICENSE);
++  uclicense = toupper (settings.LICENSE);
+   switch (uclicense)
+     case "GPL"
+       head = cstrcat (copyright, "\n\n", "\
+@@ -395,7 +402,7 @@
+ 
+     otherwise
+       head = "";
+-      tail = cstrcat (copyright, "\n\n", FUNCTION.LICENSE, "\n",
++      tail = cstrcat (copyright, "\n\n", settings.LICENSE, "\n",
+                      author, "\n", revs);
+   endswitch
+ 
+@@ -450,8 +457,8 @@
+   fclose (fid);
+ 
+   ## Finally we are ready to edit it!
+-  system (sprintf (FUNCTION.EDITOR, cstrcat ("\"", fileandpath, "\"")),
+-          [], FUNCTION.MODE);
++  system (sprintf (settings.EDITOR, cstrcat ("\"", fileandpath, "\"")),
++          [], settings.MODE);
+ 
+ endfunction
+ 
