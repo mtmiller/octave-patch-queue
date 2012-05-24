@@ -1,0 +1,17 @@
+# HG changeset patch
+# Parent 58eef571771ae35b33fbb91467ebc53e595cf3ff
+diff --git a/scripts/pkg/private/uninstall.m b/scripts/pkg/private/uninstall.m
+--- a/scripts/pkg/private/uninstall.m
++++ b/scripts/pkg/private/uninstall.m
+@@ -66,6 +66,11 @@
+     endif
+   endif
+ 
++  ## Found no packages to uninstall.
++  if (isempty (delete_idx))
++    return;
++  endif
++
+   ## Compute the packages that will remain installed.
+   idx = setdiff (1:num_packages, delete_idx);
+   remaining_packages = {installed_pkgs_lst{idx}};

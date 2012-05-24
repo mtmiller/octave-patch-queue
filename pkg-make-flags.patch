@@ -1,0 +1,15 @@
+# HG changeset patch
+# Parent fd6e50e2eee6499df77eb16572b4ab3417da2fc9
+
+diff --git a/scripts/pkg/private/configure_make.m b/scripts/pkg/private/configure_make.m
+--- a/scripts/pkg/private/configure_make.m
++++ b/scripts/pkg/private/configure_make.m
+@@ -65,7 +65,7 @@
+ 
+     ## Make.
+     if (exist (fullfile (src, "Makefile"), "file"))
+-      [status, output] = shell (cstrcat (scenv, "make -C '", src, "'"));
++      [status, output] = shell (cstrcat ("make -C '", src, "' ", scenv));
+       if (status != 0)
+         rmdir (desc.dir, "s");
+         error ("'make' returned the following error: %s", output);
