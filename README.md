@@ -7,25 +7,25 @@ GNU Octave (http://www.octave.org) project.
 Instructions
 ------------
 
-1) Set up an existing patch queue:
+1.  Set up an existing patch queue:
 
-  $ cd /path/to/src/octave
-  $ hg qqueue -c NAME
-  $ cd .hg
-  $ git clone -b patches-NAME https://github.com/mtmiller/octave-patch-queue.git  patches-NAME
-  $ cd ..
-  $ hg qseries
+        $ cd /path/to/src/octave
+        $ hg qqueue -c NAME
+        $ cd .hg
+        $ git clone -b patches-NAME https://github.com/mtmiller/octave-patch-queue.git  patches-NAME
+        $ cd ..
+        $ hg qseries
 
-2) Create a new patch queue:
+2.  Create a new patch queue:
 
-  $ cd /path/to/src/octave
-  $ hg qqueue -c NAME
-  $ cd .hg
-  $ git clone https://github.com/mtmiller/octave-patch-queue.git patches-NAME
-  $ cd patches-NAME
-  $ git checkout -b patches-NAME
-  $ cd ../..
-  $ hg qnew foo.diff
+        $ cd /path/to/src/octave
+        $ hg qqueue -c NAME
+        $ cd .hg
+        $ git clone https://github.com/mtmiller/octave-patch-queue.git patches-NAME
+        $ cd patches-NAME
+        $ git checkout -b patches-NAME
+        $ cd ../..
+        $ hg qnew foo.diff
 
 License
 -------
