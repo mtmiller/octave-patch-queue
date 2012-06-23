@@ -1,0 +1,19 @@
+# HG changeset patch
+# Parent a922f768ee09a51813d134c9a0b6c9990b762184
+urlwrite.cc: Ensure the default HTTP request method is reset to GET
+
+diff --git a/src/DLD-FUNCTIONS/urlwrite.cc b/src/DLD-FUNCTIONS/urlwrite.cc
+--- a/src/DLD-FUNCTIONS/urlwrite.cc
++++ b/src/DLD-FUNCTIONS/urlwrite.cc
+@@ -205,6 +205,11 @@
+ 
+       setopt (CURLOPT_NOBODY, 0);
+ 
++      // Restore the default HTTP request method to GET after setting
++      // NOBODY to true and back to false.  This is only needed for
++      // backward compatibility with versions of curl older than 7.18.2.
++      setopt (CURLOPT_HTTPGET, 1);
++
+       // Don't need to store the parameters here as we can't change
+       // the URL after the handle is created
+       std::string query_string = form_query_string (param);
